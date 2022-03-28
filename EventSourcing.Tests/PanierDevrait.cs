@@ -9,52 +9,52 @@ public record Article(string IdentifiantArticle);
 
 public class Panier
 {
-    private List<Article> _articles;
-
-    public Panier(IEvent[] histoire)
+    public class PanierDecisionProjection
     {
-        _articles = new List<Article>();
+        private List<Article> _articles = new ();
 
-        foreach (var evt in histoire) Apply(evt);
-    }
-
-    private void Apply(IEvent evt)
-    {
-        switch (evt)
+        public IReadOnlyList<Article> Articles
         {
-            case ArticleAjouteEvt articleAjouteEvt:
-                _articles.Add(articleAjouteEvt.Article);
-                break;
-            case ArticleEnleveEvt articleEnleveEvt:
-                _articles.Remove(articleEnleveEvt.Article);
-                break;
+            get => _articles;
+        }
+
+        public void Apply(IEvent evt)
+        {
+            switch (evt)
+            {
+                case ArticleAjouteEvt articleAjouteEvt:
+                    _articles.Add(articleAjouteEvt.Article);
+                    break;
+                case ArticleEnleveEvt articleEnleveEvt:
+                    _articles.Remove(articleEnleveEvt.Article);
+                    break;
+            }
         }
     }
-
-    public IEvent[] Recoit(AjouterArticleCmd cmd)
-    {
-        return ApplyAndReturn(new[] {new ArticleAjouteEvt(cmd.Article)});
-    }
-
-    public IEvent[] Recoit(EnleverArticleCmd cmd)
-    {
-        if (_articles.Any(x => x == cmd.Article))
-            return ApplyAndReturn(new[] {new ArticleEnleveEvt(cmd.Article)});
-
-        return Array.Empty<IEvent>();
-    }
-
-    public IEvent[] Recoit(ValiderPanierCmd cmd)
-    {
-        if (_articles.Count == 0) throw new PanierInvalideException();
-
-        return ApplyAndReturn(new[] {new PanierValideEvt()});
-    }
     
-    private IEvent[] ApplyAndReturn(IEvent[] histoire) {
-        foreach (var evt in histoire) Apply(evt);
+    public static IEvent[] Recoit(AjouterArticleCmd cmd, IEvent[] histoire)
+    {
+        return new[] {new ArticleAjouteEvt(cmd.Article)};
+    }
 
-        return histoire;
+    public static IEvent[] Recoit(EnleverArticleCmd cmd, IEvent[] histoire)
+    {
+        var projection = new PanierDecisionProjection();
+        foreach (var evt in histoire) projection.Apply(evt);
+        
+        if (projection.Articles.All(x => x != cmd.Article)) return Array.Empty<IEvent>();
+        
+        return new[] {new ArticleEnleveEvt(cmd.Article)};
+    }
+
+    public static IEvent[] Recoit(ValiderPanierCmd cmd, IEvent[] histoire)
+    {
+        var projection = new PanierDecisionProjection();
+        foreach (var evt in histoire) projection.Apply(evt);
+        
+        if (!projection.Articles.Any()) throw new PanierInvalideException();
+
+        return new[] {new PanierValideEvt()};
     }
 }
 
@@ -85,9 +85,8 @@ public class PanierDevrait
     public void QuandJeRajouteUnArticleJObtiensUnEvenementArticleAjoute()
     {
         var aucuneHistoire = Array.Empty<IEvent>();
-        var panier = new Panier(aucuneHistoire);
 
-        var evenements = panier.Recoit(new AjouterArticleCmd(ArticleA));
+        var evenements = Panier.Recoit(new AjouterArticleCmd(ArticleA), aucuneHistoire);
 
         Assert.Equal(evenements, new[] {new ArticleAjouteEvt(ArticleA)});
     }
@@ -96,9 +95,8 @@ public class PanierDevrait
     public void EtantDonneUnPanierAvecUnArticleAQuandJeValideJObtiensUnEvenementPanierValide()
     {
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
-        var panier = new Panier(histoire);
 
-        var evenements = panier.Recoit(new ValiderPanierCmd());
+        var evenements = Panier.Recoit(new ValiderPanierCmd(), histoire);
 
         Assert.Equal(evenements, new[] {new PanierValideEvt()});
     }
@@ -107,9 +105,8 @@ public class PanierDevrait
     public void EtantDonneUnPanierAvecUnArticleAQuandJEnleveUnArticleAAlorsJObtiensUnEvenementArticleEnleve()
     {
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
-        var panier = new Panier(histoire);
 
-        var evenements = panier.Recoit(new EnleverArticleCmd(ArticleA));
+        var evenements = Panier.Recoit(new EnleverArticleCmd(ArticleA), histoire);
 
         Assert.Equal(evenements, new[] {new ArticleEnleveEvt(ArticleA)});
     }
@@ -118,9 +115,8 @@ public class PanierDevrait
     public void EtantDonneUnPanierAvecUnArticleAQuandJEnleveUnArticleBAlorsJObtiensAucunEvenement()
     {
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
-        var panier = new Panier(histoire);
 
-        var evenements = panier.Recoit(new EnleverArticleCmd(ArticleB));
+        var evenements = Panier.Recoit(new EnleverArticleCmd(ArticleB), histoire);
 
         Assert.Equal(evenements, Array.Empty<IEvent>());
     }
@@ -129,19 +125,23 @@ public class PanierDevrait
     public void EtantDonneUnPanierVideQuandJeValideUnPanierAlorsJeRecoisUneErreur()
     {
         var aucuneHistoire = Array.Empty<IEvent>();
-        var panier = new Panier(aucuneHistoire);
 
-        Assert.Throws<PanierInvalideException>(() => { panier.Recoit(new ValiderPanierCmd()); });
+        Assert.Throws<PanierInvalideException>(() =>
+        {
+            Panier.Recoit(new ValiderPanierCmd(), aucuneHistoire);
+        });
     }
 
     [Fact]
     public void EtantDonneUnPanierAvecUnArticleAQuandJEnleveUnArticleADeuxFoisAlorsJObtiensAucunEvenement()
     {
-        var histoire = new [] { new ArticleAjouteEvt(ArticleA)};
-        var panier = new Panier(histoire);
+        var histoire = new IEvent[] { new ArticleAjouteEvt(ArticleA)};
 
-        panier.Recoit(new EnleverArticleCmd(ArticleA));
-        var evts = panier.Recoit(new EnleverArticleCmd(ArticleA));
+        var evts = Panier.Recoit(new EnleverArticleCmd(ArticleA), histoire);
+
+        histoire = histoire.Concat(evts).ToArray();
+        
+        evts = Panier.Recoit(new EnleverArticleCmd(ArticleA), histoire);
 
         Assert.Equal(evts, Array.Empty<IEvent>());
     }
