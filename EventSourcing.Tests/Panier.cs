@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Moq;
 using Xunit;
 
 namespace EventSourcing.Tests;
@@ -50,7 +51,9 @@ public class PaniersReadModel
 
 public record Article(string IdentifiantArticle);
 
-public interface IEvent { };
+public interface IEvent
+{
+};
 
 public record ArticleAjouteEvt(Guid IdentifiantPanier, Article Article) : IEvent;
 
@@ -58,7 +61,9 @@ public record ArticleEnleveEvt(Guid IdentifiantPanier, Article Article) : IEvent
 
 public record PanierValideEvt(Guid IdentifiantPanier) : IEvent;
 
-public class PanierInvalideException : Exception { }
+public class PanierInvalideException : Exception
+{
+}
 
 public class Panier
 {
@@ -116,6 +121,81 @@ public record AjouterArticleCmd(Guid IdentifiantPanier, Article Article);
 public record EnleverArticleCmd(Guid IdentifiantPanier, Article Article);
 
 public record ValiderPanierCmd(Guid IdentifiantPanier);
+
+public interface IEventStore
+{
+    void Save(IEvent[] events);
+}
+
+public class EventPublisher
+{
+    private readonly IEventStore _eventStore;
+
+    private Dictionary<Type, List<Action<IEvent>>> handlers = new();
+
+    public EventPublisher(IEventStore eventStore)
+    {
+        _eventStore = eventStore;
+    }
+
+    public void Publish(IEvent[] newEvents)
+    {
+        _eventStore.Save(newEvents);
+
+        foreach (var evt in newEvents)
+        {
+            if (!handlers.ContainsKey(evt.GetType())) continue;
+            
+            handlers[evt.GetType()].ForEach(handler => handler.Invoke(evt));
+        }
+    }
+
+    public void Subscribe<T>(Action<T> quand) where T : IEvent
+    {
+        var tHandlers = handlers.ContainsKey(typeof(T)) ? handlers[typeof(T)] : new List<Action<IEvent>>();
+
+        tHandlers.Add(x => quand((T)x));
+
+        handlers[typeof(T)] = tHandlers;
+    }
+}
+
+public class PubSubTests
+{
+    Guid IdentiantPanierA = new("9245fe4a-d402-451c-b9ed-9c1a04247482");
+    Article UnArticle = new("A");
+
+    [Fact]
+    public void QuandUnEvenementEstPublieAlorsIlEstPersiste()
+    {
+        var eventStore = new Mock<IEventStore>();
+        var eventPublisher = new EventPublisher(eventStore.Object);
+
+        var histoire = new[] {new ArticleAjouteEvt(IdentiantPanierA, UnArticle)};
+        eventPublisher.Publish(histoire);
+
+        eventStore.Verify(x => x.Save(It.Is<IEvent[]>(evts => evts.SequenceEqual(histoire))));
+    }
+
+    [Fact]
+    public void QuandUnEvenementEstPublieAlorsLesReadModelsAbonnesSontAppelles()
+    {
+        var eventStore = new Mock<IEventStore>();
+        var eventPublisher = new EventPublisher(eventStore.Object);
+
+        var handlerCalled = false;
+        Action<ArticleAjouteEvt> handler = evt => handlerCalled = true;
+        
+        eventPublisher.Subscribe(handler);
+
+        var histoire = new[] {new ArticleAjouteEvt(IdentiantPanierA, UnArticle)};
+        eventPublisher.Publish(histoire);
+
+        Assert.Equal(handlerCalled, true);
+    }
+    
+    // todo: Integration test
+}
 
 public class PanierReadModelTests
 {
