@@ -87,8 +87,7 @@ public class PanierDevrait
         var aucuneHistoire = Array.Empty<IEvent>();
         var panier = new Panier(aucuneHistoire);
 
-        var evenements
-            = panier.Recoit(new AjouterArticleCmd(ArticleA));
+        var evenements = panier.Recoit(new AjouterArticleCmd(ArticleA));
 
         Assert.Equal(evenements, new[] {new ArticleAjouteEvt(ArticleA)});
     }
@@ -99,8 +98,7 @@ public class PanierDevrait
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
         var panier = new Panier(histoire);
 
-        var evenements
-            = panier.Recoit(new ValiderPanierCmd());
+        var evenements = panier.Recoit(new ValiderPanierCmd());
 
         Assert.Equal(evenements, new[] {new PanierValideEvt()});
     }
@@ -111,8 +109,7 @@ public class PanierDevrait
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
         var panier = new Panier(histoire);
 
-        var evenements
-            = panier.Recoit(new EnleverArticleCmd(ArticleA));
+        var evenements = panier.Recoit(new EnleverArticleCmd(ArticleA));
 
         Assert.Equal(evenements, new[] {new ArticleEnleveEvt(ArticleA)});
     }
@@ -123,8 +120,7 @@ public class PanierDevrait
         var histoire = new[] {new ArticleAjouteEvt(ArticleA)};
         var panier = new Panier(histoire);
 
-        var evenements
-            = panier.Recoit(new EnleverArticleCmd(ArticleB));
+        var evenements = panier.Recoit(new EnleverArticleCmd(ArticleB));
 
         Assert.Equal(evenements, Array.Empty<IEvent>());
     }
