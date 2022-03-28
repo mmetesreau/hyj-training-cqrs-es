@@ -5,61 +5,66 @@ using Xunit;
 
 namespace EventSourcing.Tests;
 
-public interface IPanierReadModelRepository
+public record PanierReadModel(int NombreArticles);
+
+public interface IPaniersReadModelRepository
 {
-    void Set(Guid id, int value);
-    int Get(Guid id);
+    void Set(Guid id, PanierReadModel value);
+    PanierReadModel Get(Guid id);
 }
 
-public class PanierReadModelInMemoryRepository : IPanierReadModelRepository
+public class PaniersReadModelInMemoryRepository : IPaniersReadModelRepository
 {
-    private Dictionary<Guid, int> _data = new ();
+    private Dictionary<Guid, PanierReadModel> _data = new();
 
-    public void Set(Guid id, int value)
-    {
-        _data[id] = value;
-    }
+    public void Set(Guid id, PanierReadModel value) => _data[id] = value;
 
-    public int Get(Guid id)
-    {
-        return _data.ContainsKey(id) ? _data[id] : 0;
-    }
+    public PanierReadModel Get(Guid id) => _data.ContainsKey(id) ? _data[id] : new PanierReadModel(0);
 }
 
-public class PanierReadModel
+public class PaniersReadModel
 {
-    private readonly IPanierReadModelRepository _repository;
+    private readonly IPaniersReadModelRepository _repository;
 
-    public PanierReadModel(IPanierReadModelRepository repository)
+    public PaniersReadModel(IPaniersReadModelRepository repository)
     {
         _repository = repository;
     }
 
-    public int Get(Guid identifiantPanier)
-    {
-        return _repository.Get(identifiantPanier);
-    }
+    public PanierReadModel Get(Guid identifiantPanier) => _repository.Get(identifiantPanier);
 
     public void Quand(ArticleAjouteEvt evt)
     {
-        var nombreArticles = _repository.Get(evt.IdentifiantPanier);
-        _repository.Set(evt.IdentifiantPanier, nombreArticles + 1);
+        var panierReadModel = _repository.Get(evt.IdentifiantPanier);
+        _repository.Set(evt.IdentifiantPanier,
+            panierReadModel with {NombreArticles = panierReadModel.NombreArticles + 1});
     }
-    
+
     public void Quand(ArticleEnleveEvt evt)
     {
-        var nombreArticles = _repository.Get(evt.IdentifiantPanier);
-        _repository.Set(evt.IdentifiantPanier, nombreArticles - 1);
+        var panierReadModel = _repository.Get(evt.IdentifiantPanier);
+        _repository.Set(evt.IdentifiantPanier,
+            panierReadModel with {NombreArticles = panierReadModel.NombreArticles - 1});
     }
 }
 
 public record Article(string IdentifiantArticle);
 
+public interface IEvent { };
+
+public record ArticleAjouteEvt(Guid IdentifiantPanier, Article Article) : IEvent;
+
+public record ArticleEnleveEvt(Guid IdentifiantPanier, Article Article) : IEvent;
+
+public record PanierValideEvt(Guid IdentifiantPanier) : IEvent;
+
+public class PanierInvalideException : Exception { }
+
 public class Panier
 {
     public class PanierDecisionProjection
     {
-        private List<Article> _articles = new ();
+        private List<Article> _articles = new();
 
         public IReadOnlyList<Article> Articles
         {
@@ -79,7 +84,7 @@ public class Panier
             }
         }
     }
-    
+
     public static IEvent[] Recoit(AjouterArticleCmd cmd, IEvent[] histoire)
     {
         return new[] {new ArticleAjouteEvt(cmd.IdentifiantPanier, cmd.Article)};
@@ -89,9 +94,9 @@ public class Panier
     {
         var projection = new PanierDecisionProjection();
         foreach (var evt in histoire) projection.Apply(evt);
-        
+
         if (projection.Articles.All(x => x != cmd.Article)) return Array.Empty<IEvent>();
-        
+
         return new[] {new ArticleEnleveEvt(cmd.IdentifiantPanier, cmd.Article)};
     }
 
@@ -99,61 +104,50 @@ public class Panier
     {
         var projection = new PanierDecisionProjection();
         foreach (var evt in histoire) projection.Apply(evt);
-        
+
         if (!projection.Articles.Any()) throw new PanierInvalideException();
 
         return new[] {new PanierValideEvt(cmd.IdentifiantPanier)};
     }
 }
 
-public interface ICommand { }
+public record AjouterArticleCmd(Guid IdentifiantPanier, Article Article);
 
-public record AjouterArticleCmd(Guid IdentifiantPanier, Article Article) : ICommand;
+public record EnleverArticleCmd(Guid IdentifiantPanier, Article Article);
 
-public record EnleverArticleCmd(Guid IdentifiantPanier, Article Article) : ICommand;
-
-public record ValiderPanierCmd(Guid IdentifiantPanier) : ICommand;
-
-public interface IEvent { };
-
-public record ArticleAjouteEvt(Guid IdentifiantPanier, Article Article) : IEvent;
-
-public record ArticleEnleveEvt(Guid IdentifiantPanier, Article Article) : IEvent;
-
-public record PanierValideEvt(Guid IdentifiantPanier) : IEvent;
-
-public class PanierInvalideException : Exception { }
+public record ValiderPanierCmd(Guid IdentifiantPanier);
 
 public class PanierReadModelTests
 {
-    Guid IdentiantPanierA = new ("9245fe4a-d402-451c-b9ed-9c1a04247482");
-    Guid IdentiantPanierB = new ("9245fe4a-d402-451c-b9ed-9c1a04247483");
+    Guid IdentiantPanierA = new("9245fe4a-d402-451c-b9ed-9c1a04247482");
+    Guid IdentiantPanierB = new("9245fe4a-d402-451c-b9ed-9c1a04247483");
     Article UnArticle = new("A");
-    
+
     [Fact]
     public void QuandUnEvenementArticleAjouteEstLeveAlorsLePanierReadModelAssocieEstMisAJour()
     {
-        var panierRepository = new PanierReadModelInMemoryRepository();
-        var panierReadModel = new PanierReadModel(panierRepository);
-        
+        var panierRepository = new PaniersReadModelInMemoryRepository();
+        var panierReadModel = new PaniersReadModel(panierRepository);
+
         panierReadModel.Quand(new ArticleAjouteEvt(IdentiantPanierA, UnArticle));
-        
-        Assert.Equal(panierReadModel.Get(IdentiantPanierA), 1);
-        Assert.Equal(panierReadModel.Get(IdentiantPanierB), 0);
+
+        Assert.Equal(panierReadModel.Get(IdentiantPanierA), new PanierReadModel(1));
+        Assert.Equal(panierReadModel.Get(IdentiantPanierB), new PanierReadModel(0));
     }
-    
+
     [Fact]
     public void QuandUnEvenementArticleEnleveEstLeveAlorsLePanierReadModelAssocieEstMisAJour()
     {
-        var panierRepository = new PanierReadModelInMemoryRepository();
-        var panierReadModel = new PanierReadModel(panierRepository);
-        
+        var panierRepository = new PaniersReadModelInMemoryRepository();
+        var panierReadModel = new PaniersReadModel(panierRepository);
+
+        panierReadModel.Quand(new ArticleAjouteEvt(IdentiantPanierA, UnArticle));
         panierReadModel.Quand(new ArticleAjouteEvt(IdentiantPanierA, UnArticle));
         panierReadModel.Quand(new ArticleAjouteEvt(IdentiantPanierA, UnArticle));
         panierReadModel.Quand(new ArticleEnleveEvt(IdentiantPanierA, UnArticle));
-        
-        Assert.Equal(panierReadModel.Get(IdentiantPanierA), 1);
-        Assert.Equal(panierReadModel.Get(IdentiantPanierB), 0);
+
+        Assert.Equal(panierReadModel.Get(IdentiantPanierA), new PanierReadModel(2));
+        Assert.Equal(panierReadModel.Get(IdentiantPanierB), new PanierReadModel(0));
     }
 }
 
@@ -217,14 +211,14 @@ public class PanierTests
     [Fact]
     public void EtantDonneUnPanierAvecUnArticleAQuandJEnleveUnArticleADeuxFoisAlorsJObtiensAucunEvenement()
     {
-        var histoire = new IEvent[] { new ArticleAjouteEvt(UnIdentifiantPanier, ArticleA)};
+        var histoire = new IEvent[] {new ArticleAjouteEvt(UnIdentifiantPanier, ArticleA)};
 
-        var evts = Panier.Recoit(new EnleverArticleCmd(UnIdentifiantPanier, ArticleA), histoire);
+        var evenements = Panier.Recoit(new EnleverArticleCmd(UnIdentifiantPanier, ArticleA), histoire);
 
-        histoire = histoire.Concat(evts).ToArray();
-        
-        evts = Panier.Recoit(new EnleverArticleCmd(UnIdentifiantPanier, ArticleA), histoire);
+        histoire = histoire.Concat(evenements).ToArray();
 
-        Assert.Equal(evts, Array.Empty<IEvent>());
+        evenements = Panier.Recoit(new EnleverArticleCmd(UnIdentifiantPanier, ArticleA), histoire);
+
+        Assert.Equal(evenements, Array.Empty<IEvent>());
     }
 }
