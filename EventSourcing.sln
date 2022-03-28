@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSourcing.Tests", "EventSourcing.Tests\EventSourcing.Tests.csproj", "{D8AD4E5E-1875-4A4E-9BAB-2D0B605B5BF4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D8AD4E5E-1875-4A4E-9BAB-2D0B605B5BF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8AD4E5E-1875-4A4E-9BAB-2D0B605B5BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8AD4E5E-1875-4A4E-9BAB-2D0B605B5BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8AD4E5E-1875-4A4E-9BAB-2D0B605B5BF4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
