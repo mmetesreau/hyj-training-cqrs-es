@@ -7,30 +7,30 @@ namespace TrainingCQRSES.Tests;
 public class EventStoreTests
 {
     [Fact]
-    public void EventStore_should_return_only_events_for_a_specific_aggregate()
+    public async void EventStore_should_return_only_events_for_a_specific_aggregate()
     {
         var eventStore = new InMemoryEventStore();
         
-        eventStore.Save(new IEvent[]
+        await eventStore.Save(new IEvent[]
         {
             new ArticleAjouteEvt(IdentiantPanierA, ArticleB),
         });
         
-        eventStore.Save(new IEvent[]
+        await eventStore.Save(new IEvent[]
         {
             new ArticleAjouteEvt(IdentiantPanierB, ArticleA),
             new ArticleEnleveEvt(IdentiantPanierB, ArticleA),
             new ArticleAjouteEvt(IdentiantPanierB, ArticleB),
         });
 
-        var events = eventStore.Get(IdentiantPanierA);
+        var events = await eventStore.Get(IdentiantPanierA);
         
         Assert.Equal(new IEvent[]
         {
             new ArticleAjouteEvt(IdentiantPanierA, ArticleB),
         }, events);
         
-        events = eventStore.Get(IdentiantPanierB);
+        events = await eventStore.Get(IdentiantPanierB);
 
         Assert.Equal(new IEvent[]
         {
@@ -45,9 +45,9 @@ public class EventStoreTests
     {
         var eventStore = new InMemoryEventStore();
 
-        Assert.Throws<VersionMismatchException>(() =>
+        Assert.ThrowsAsync<VersionMismatchException>(async () =>
         {
-            eventStore.Save(new []
+           await eventStore.Save(new []
             {
                 new AggregateEvents(new[]
                 {

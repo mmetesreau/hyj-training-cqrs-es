@@ -11,33 +11,33 @@ public class PanierCommandHandler
         _eventPublisher = eventPublisher;
     }
 
-    public void Handle(AjouterArticleCmd cmd)
+    public async Task Handle(AjouterArticleCmd cmd)
     {
-        var histoire = _eventStore.Get(cmd.IdentifiantPanier);
+        var histoire = await _eventStore.Get(cmd.IdentifiantPanier);
 
         var decisions = PanierAggregate.Recoit(cmd, histoire);
         
-        _eventPublisher.Publish(decisions);
+        await _eventPublisher.Publish(decisions);
     }
 
-    public void Handle(EnleverArticleCmd cmd)
+    public async Task Handle(EnleverArticleCmd cmd)
     {
-        var histoire = _eventStore.Get(cmd.IdentifiantPanier);
+        var histoire = await _eventStore.Get(cmd.IdentifiantPanier);
 
         var decisions = PanierAggregate.Recoit(cmd, histoire);
         
-        _eventPublisher.Publish(decisions);
+        await _eventPublisher.Publish(decisions);
     }
 }
 
 public interface IEventStore
 {
-    void Save(IEvent[] events);
-    IEvent[] Get(Guid aggregateId);
+    Task Save(IEvent[] events);
+    Task<IEvent[]> Get(Guid aggregateId);
 }
 
 public interface IEventPublisher
 {
-    void Publish(IEvent[] events);
+    Task Publish(IEvent[] events);
     void Subscribe<T>(Action<T> handler) where T : IEvent;
 }
