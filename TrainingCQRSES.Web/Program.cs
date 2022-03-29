@@ -3,7 +3,7 @@ using TrainingCQRSES;
 using TrainingCQRSES.Web;
 using TrainingCQRSES.Web.Infra;
 
-// docker compose up -d
+// docker compose up -d then go to https://localhost:7182/swagger/index.html
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +25,16 @@ builder.Services.AddSingleton<IEventPublisher>(eventPublisher);
 builder.Services.AddSingleton<PanierQueryHandler>(panierQueryHandler);
 builder.Services.AddScoped<PanierCommandHandler>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.MapGet("/api/panier/{panierId}", async (Guid panierId, PanierQueryHandler queryHandler) =>
 {
