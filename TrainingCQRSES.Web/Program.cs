@@ -3,12 +3,10 @@ using TrainingCQRSES;
 using TrainingCQRSES.Web;
 using TrainingCQRSES.Web.Infra;
 
-// docker compose up -d then go to https://localhost:7182/swagger/index.html
-
 var builder = WebApplication.CreateBuilder(args);
 
-var postgresCnx = "User ID=postgres;Password=hackyourjob;Host=localhost;Port=5438;Database=postgres;";
-var eventStoreCnx = "esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000";
+var postgresCnx = "User ID=postgres;Password=hackyourjob;Host=postgres;Port=5432;Database=postgres;";
+var eventStoreCnx = "esdb://eventstore:2113?tls=true&keepAliveTimeout=10000&keepAliveInterval=10000";
 
 var eventStore = new EventStoreDb(eventStoreCnx);
 var panierRepository = new PaniersPostgresRepository(postgresCnx);
@@ -30,11 +28,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapGet("/api/panier/{panierId}", async (Guid panierId, PanierQueryHandler queryHandler) =>
 {
@@ -43,18 +38,20 @@ app.MapGet("/api/panier/{panierId}", async (Guid panierId, PanierQueryHandler qu
     return Results.Ok(panierQuantity);
 });
 
-app.MapPost("/api/panier/{panierId}", async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
-{
-    await commandHandler.Handle(new AjouterArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
-    
-    return Results.Ok();
-});
+app.MapPost("/api/panier/{panierId}",
+    async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
+    {
+        await commandHandler.Handle(new AjouterArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
 
-app.MapDelete("/api/panier/{panierId}", async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
-{
-    await commandHandler.Handle(new EnleverArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
-    
-    return Results.Ok();
-});
+        return Results.Ok();
+    });
+
+app.MapDelete("/api/panier/{panierId}",
+    async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
+    {
+        await commandHandler.Handle(new EnleverArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
+
+        return Results.Ok();
+    });
 
 app.Run();

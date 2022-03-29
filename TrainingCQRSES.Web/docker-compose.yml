@@ -1,17 +1,27 @@
 version: "3.9"
 services:
+  web:
+    build:
+      context: ../
+      dockerfile: TrainingCQRSES.Web/Dockerfile
+    ports:
+      - '3000:80'
+    depends_on:
+      - "postgres"
+      - "eventstore"
   postgres:
     image: "postgres:latest"
     environment:
       - POSTGRES_PASSWORD=hackyourjob
     ports:
-      - '5438:5432'
+      - '5432:5432'
   eventstore:
     image: "eventstore/eventstore:latest"
     environment:
       - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
       - EVENTSTORE_INSECURE=true
       - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
     ports:
       - '2113:2113'
-      - '1113:1113'
+      - '1113:1113'  

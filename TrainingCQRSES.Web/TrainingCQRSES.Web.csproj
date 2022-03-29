@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TrainingCQRSES.Tests\TrainingCQRSES.Tests.csproj" />
       <ProjectReference Include="..\TrainingCQRSES\TrainingCQRSES.csproj" />
     </ItemGroup>
 

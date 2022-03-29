@@ -42,8 +42,7 @@ public class EventStoreDb : IEventStore
         if (await stream.ReadState == ReadState.StreamNotFound)
             return Array.Empty<IEvent>();
 
-        return stream
-            .ToEnumerable()
+        return (await stream.ToListAsync())
             .Select(x => DeserializeEvent(x.Event.Data.Span))
             .ToArray();
 
