@@ -1,7 +1,4 @@
-﻿
-using TrainingCQRSES.Core.Panier;
-
-namespace TrainingCQRSES.Core;
+﻿namespace TrainingCQRSES.Core;
 
 public class PanierCommandHandler
 {
@@ -20,7 +17,7 @@ public class PanierCommandHandler
 
         var decisions = PanierAggregate.Recoit(cmd, histoire);
         
-        _eventPublisher.Publish(cmd.IdentifiantPanier, decisions);
+        _eventPublisher.Publish(decisions);
     }
 
     public void Handle(EnleverArticleCmd cmd)
@@ -29,19 +26,18 @@ public class PanierCommandHandler
 
         var decisions = PanierAggregate.Recoit(cmd, histoire);
         
-        _eventPublisher.Publish(cmd.IdentifiantPanier, decisions);
+        _eventPublisher.Publish(decisions);
     }
 }
 
-
 public interface IEventStore
 {
-    void Save(Guid aggregateId, IEvent[] events);
+    void Save(IEvent[] events);
     IEvent[] Get(Guid aggregateId);
 }
 
 public interface IEventPublisher
 {
-    void Publish(Guid aggregateId, IEvent[] events);
+    void Publish(IEvent[] events);
     void Subscribe<T>(Action<T> handler) where T : IEvent;
 }

@@ -1,7 +1,7 @@
 ﻿using System;
-using TrainingCQRSES.Core.Panier;
+using TrainingCQRSES.Core;
 
-namespace EventSourcing.Tests;
+namespace TrainingCQRSES.Tests;
 
 public static class Data
 {

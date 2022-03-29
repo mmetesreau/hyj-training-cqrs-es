@@ -1,19 +1,17 @@
-﻿using TrainingCQRSES.Core.Panier;
+﻿namespace TrainingCQRSES.Core;
 
-namespace TrainingCQRSES.Core.Panier.Queries;
+public record PanierQuantite(int NombreArticles);
 
-public record Panier(int NombreArticles);
-
-public class PaniersQueryHandler
+public class PanierQueryHandler
 {
     private readonly IPaniersRepository _panierRepository;
 
-    public PaniersQueryHandler(IPaniersRepository panierRepository)
+    public PanierQueryHandler(IPaniersRepository panierRepository)
     {
         _panierRepository = panierRepository;
     }
 
-    public Panier Get(Guid identifiantPanier)
+    public PanierQuantite GetQuantity(Guid identifiantPanier)
     {
         return _panierRepository.Get(identifiantPanier);
     }
@@ -37,6 +35,6 @@ public class PaniersQueryHandler
 
 public interface IPaniersRepository
 {
-    void Set(Guid id, Panier value);
-    Panier Get(Guid id);
+    void Set(Guid id, PanierQuantite value);
+    PanierQuantite Get(Guid id);
 }

@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using TrainingCQRSES.Core.Panier;
+using TrainingCQRSES.Core;
 using Xunit;
-using static EventSourcing.Tests.Data;
+using static TrainingCQRSES.Tests.Data;
 
-namespace EventSourcing.Tests;
+namespace TrainingCQRSES.Tests;
 
 public class PanierTests
 {
