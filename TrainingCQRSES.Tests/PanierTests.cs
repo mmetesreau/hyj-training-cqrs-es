@@ -13,7 +13,7 @@ public class PanierTests
     [Fact]
     public void Quand_je_rajoute_un_article_alors_j_obtiens_un_evenement_ArticleAjoute()
     {
-        var decisions = PanierAggregate.Recoit(new AjouterArticleCmd(IdentiantPanierA, ArticleA), AucuneHistoire);
+        var decisions = Panier.Recoit(new AjouterArticleCmd(IdentiantPanierA, ArticleA), AucuneHistoire);
 
         Assert.Equal(new[] {new ArticleAjouteEvt(IdentiantPanierA, ArticleA)}, decisions);
     }
@@ -21,7 +21,7 @@ public class PanierTests
     [Fact]
     public void Etant_donne_un_panier_avec_un_articleA_quand_je_valide_alors_j_obtiens_un_evenement_PanierValide()
     {
-        var decisions = PanierAggregate.Recoit(new ValiderPanierCmd(IdentiantPanierA), new[]
+        var decisions = Panier.Recoit(new ValiderPanierCmd(IdentiantPanierA), new[]
         {
             new ArticleAjouteEvt(IdentiantPanierA, ArticleA)
         });
@@ -32,7 +32,7 @@ public class PanierTests
     [Fact]
     public void Etant_donne_un_panier_avec_un_articleA_quand_j_enleve_un_article_alors_j_obtiens_un_evenement_ArticleEnleve()
     {
-        var decisions = PanierAggregate.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), new[]
+        var decisions = Panier.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), new[]
         {
             new ArticleAjouteEvt(IdentiantPanierA, ArticleA)
         });
@@ -43,7 +43,7 @@ public class PanierTests
     [Fact]
     public void Etant_donne_un_panier_avec_un_articleA_quand_j_enleve_un_articleB_alors_je_n_obtiens_aucun_evenement()
     {
-        var decisions = PanierAggregate.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleB), new[]
+        var decisions = Panier.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleB), new[]
         {
             new ArticleAjouteEvt(IdentiantPanierA, ArticleA)
         });
@@ -56,7 +56,7 @@ public class PanierTests
     {
         Assert.Throws<PanierInvalideException>(() =>
         {
-            PanierAggregate.Recoit(new ValiderPanierCmd(IdentiantPanierA), AucuneHistoire);
+            Panier.Recoit(new ValiderPanierCmd(IdentiantPanierA), AucuneHistoire);
         });
     }
 
@@ -65,11 +65,11 @@ public class PanierTests
     {
         var histoire = new IEvent[] {new ArticleAjouteEvt(IdentiantPanierA, ArticleA)};
 
-        var decisions = PanierAggregate.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), histoire);
+        var decisions = Panier.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), histoire);
 
         histoire = histoire.Concat(decisions).ToArray();
 
-        decisions = PanierAggregate.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), histoire);
+        decisions = Panier.Recoit(new EnleverArticleCmd(IdentiantPanierA, ArticleA), histoire);
 
         Assert.Equal(Array.Empty<IEvent>(), decisions);
     }

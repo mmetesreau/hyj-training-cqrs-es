@@ -30,16 +30,14 @@ app.MapGet("/api/panier/{panierId}", async (Guid panierId, PanierQueryHandler qu
 
 app.MapPost("/api/panier/{panierId}", async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
 {
-    await commandHandler
-        .Handle(new AjouterArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
+    await commandHandler.Handle(new AjouterArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
     
     return Results.Ok();
 });
 
 app.MapDelete("/api/panier/{panierId}", async (Guid panierId, [FromBody] ArticleDto dto, PanierCommandHandler commandHandler) =>
 {
-    await commandHandler
-        .Handle(new EnleverArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
+    await commandHandler.Handle(new EnleverArticleCmd(panierId, new Article(dto.IdentifiantArticle)));
     
     return Results.Ok();
 });

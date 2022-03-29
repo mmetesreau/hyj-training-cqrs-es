@@ -15,7 +15,7 @@ public class PanierCommandHandler
     {
         var histoire = await _eventStore.Get(cmd.IdentifiantPanier);
 
-        var decisions = PanierAggregate.Recoit(cmd, histoire);
+        var decisions = Panier.Recoit(cmd, histoire);
         
         await _eventPublisher.Publish(decisions);
     }
@@ -24,7 +24,7 @@ public class PanierCommandHandler
     {
         var histoire = await _eventStore.Get(cmd.IdentifiantPanier);
 
-        var decisions = PanierAggregate.Recoit(cmd, histoire);
+        var decisions = Panier.Recoit(cmd, histoire);
         
         await _eventPublisher.Publish(decisions);
     }

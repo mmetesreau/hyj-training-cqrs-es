@@ -1,6 +1,4 @@
-﻿using Moq;
-using TrainingCQRSES;
-using Xunit;
+﻿using Xunit;
 using static TrainingCQRSES.Tests.Data;
 
 namespace TrainingCQRSES.Tests;
@@ -9,14 +7,14 @@ public class PanierCommandHandlerTests
 {
     // docker run --name esdb-node -it -p 2113:2113 -p 1113:1113 eventstore/eventstore:latest --insecure --run-projections=All --enable-external-tcp --enable-atom-pub-over-http
     // docker start esdb-node
-    private const string EventStoreConnectionString =
-        "esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000";
+    // private const string EventStoreConnectionString =
+    //     "esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000";
     
     [Fact]
     public async void Quand_je_rajoute_un_article_alors_le_panier_est_incremente()
     {
-        // var eventStore = new Mock<IEventStore>().Object;
-        var eventStore = new EventStoreDb(EventStoreConnectionString);
+        var eventStore = new InMemoryEventStore();
+        // var eventStore = new EventStoreDb(EventStoreConnectionString);
         
         var eventPublisher = new SimpleEventPublisher(eventStore);
 
@@ -33,8 +31,8 @@ public class PanierCommandHandlerTests
     [Fact]
     public async void Quand_j_enleve_un_article_alors_le_panier_est_decremente()
     {
-        // var eventStore = new InMemoryEventStore().Object;
-        var eventStore = new EventStoreDb(EventStoreConnectionString);
+        var eventStore = new InMemoryEventStore();
+        // var eventStore = new EventStoreDb(EventStoreConnectionString);
         
         var eventPublisher = new SimpleEventPublisher(eventStore);
 
