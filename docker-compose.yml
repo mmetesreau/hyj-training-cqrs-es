@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_PASSWORD=hackyourjob
+    ports:
+      - '5438:5432'
+  eventstore:
+    image: "eventstore/eventstore:latest"
+    environment:
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_RUN_PROJECTIONS=All
+    ports:
+      - '2113:2113'
+      - '1113:1113'

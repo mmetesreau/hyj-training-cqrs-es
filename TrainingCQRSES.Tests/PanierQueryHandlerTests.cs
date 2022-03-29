@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TrainingCQRSES;
 using Xunit;
 using static TrainingCQRSES.Tests.Data;
 
@@ -15,8 +14,8 @@ public class PanierQueryHandlerTests
 
         paniersQueryHandler.Quand(new ArticleAjouteEvt(IdentiantPanierA, ArticleA));
 
-        Assert.Equal(new PanierQuantite(1), paniersQueryHandler.GetQuantity(IdentiantPanierA));
-        Assert.Equal(new PanierQuantite(0), paniersQueryHandler.GetQuantity(IdentiantPanierB));
+        Assert.Equal(new PanierQuantite { NombreArticles = 1 }, paniersQueryHandler.GetQuantity(IdentiantPanierA));
+        Assert.Equal(new PanierQuantite  { NombreArticles = 0 }, paniersQueryHandler.GetQuantity(IdentiantPanierB));
     }
 
     [Fact]
@@ -29,8 +28,8 @@ public class PanierQueryHandlerTests
         paniersQueryHandler.Quand(new ArticleAjouteEvt(IdentiantPanierA, ArticleA));
         paniersQueryHandler.Quand(new ArticleEnleveEvt(IdentiantPanierA, ArticleA));
 
-        Assert.Equal(new PanierQuantite(2), paniersQueryHandler.GetQuantity(IdentiantPanierA));
-        Assert.Equal(new PanierQuantite(0), paniersQueryHandler.GetQuantity(IdentiantPanierB));
+        Assert.Equal(new PanierQuantite { NombreArticles = 2 }, paniersQueryHandler.GetQuantity(IdentiantPanierA));
+        Assert.Equal(new PanierQuantite  { NombreArticles = 0 }, paniersQueryHandler.GetQuantity(IdentiantPanierB));
     }
 }
 
@@ -40,5 +39,5 @@ public class PaniersInMemoryRepository : IPaniersRepository
 
     public void Set(Guid id, PanierQuantite value) => _data[id] = value;
 
-    public PanierQuantite Get(Guid id) => _data.ContainsKey(id) ? _data[id] : new PanierQuantite(0);
+    public PanierQuantite Get(Guid id) => _data.ContainsKey(id) ? _data[id] : new PanierQuantite  { NombreArticles = 0 };
 }

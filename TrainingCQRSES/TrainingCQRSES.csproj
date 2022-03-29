@@ -7,9 +7,4 @@
         <RootNamespace>TrainingCQRSES.Core</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="EventStore.Client.Grpc.Streams" Version="22.0.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    </ItemGroup>
-
 </Project>

@@ -1,15 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using TrainingCQRSES;
-using TrainingCQRSES.Tests;
 using TrainingCQRSES.Web;
+using TrainingCQRSES.Web.Infra;
+
+// docker compose up -d
 
 var builder = WebApplication.CreateBuilder(args);
 
-var eventStore = new InMemoryEventStore();
+var postgresCnx = "User ID=postgres;Password=hackyourjob;Host=localhost;Port=5438;Database=postgres;";
+var eventStoreCnx = "esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000";
 
-var panierQueryHandler = new PanierQueryHandler(new PaniersInMemoryRepository());
+var eventStore = new EventStoreDb(eventStoreCnx);
+var panierRepository = new PaniersPostgresRepository(postgresCnx);
 
+var panierQueryHandler = new PanierQueryHandler(panierRepository);
 var eventPublisher = new SimpleEventPublisher(eventStore);
+
 eventPublisher.Subscribe<ArticleAjouteEvt>(panierQueryHandler.Quand);
 eventPublisher.Subscribe<ArticleEnleveEvt>(panierQueryHandler.Quand);
 

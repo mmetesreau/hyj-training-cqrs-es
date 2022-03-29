@@ -11,4 +11,12 @@
       <ProjectReference Include="..\TrainingCQRSES\TrainingCQRSES.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.0.123" />
+      <PackageReference Include="EventStore.Client.Grpc.Streams" Version="22.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+      <PackageReference Include="Npgsql" Version="7.0.0-preview.2" />
+      <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    </ItemGroup>
+
 </Project>

@@ -1,6 +1,9 @@
 ﻿namespace TrainingCQRSES;
 
-public record PanierQuantite(int NombreArticles);
+public record PanierQuantite()
+{
+    public int NombreArticles { get; set; }
+};
 
 public class PanierQueryHandler
 {
