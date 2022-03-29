@@ -2,7 +2,7 @@
 
 public class PanierInvalideException : Exception { }
 
-public class Panier
+public class PanierAggregate
 {
     public class DecisionProjection
     {
