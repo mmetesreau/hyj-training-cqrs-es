@@ -1,4 +1,4 @@
-﻿namespace TrainingCQRSES.Core;
+﻿namespace TrainingCQRSES;
 
 public record PanierQuantite(int NombreArticles);
 

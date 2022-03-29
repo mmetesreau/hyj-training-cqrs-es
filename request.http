@@ -1,0 +1,19 @@
+GET https://localhost:7182/api/panier/9245fe4a-d402-451c-b9ed-9c1a04247482
+
+###
+
+POST https://localhost:7182/api/panier/9245fe4a-d402-451c-b9ed-9c1a04247482
+content-type: application/json
+
+{
+    "IdentifiantArticle": "test article"
+}
+
+###
+
+DELETE https://localhost:7182/api/panier/9245fe4a-d402-451c-b9ed-9c1a04247482
+content-type: application/json
+
+{
+    "IdentifiantArticle": "test article"
+}

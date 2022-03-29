@@ -22,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TrainingCQRSES.Core\TrainingCQRSES.Core.csproj" />
+      <ProjectReference Include="..\TrainingCQRSES\TrainingCQRSES.csproj" />
     </ItemGroup>
 
 </Project>

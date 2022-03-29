@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using EventStore.Client;
 using Newtonsoft.Json;
+using static EventStore.Client.Uuid;
 
-namespace TrainingCQRSES.Core;
+namespace TrainingCQRSES;
 
 public class VersionMismatchException : Exception
 {
@@ -24,18 +25,17 @@ public class EventStoreDb : IEventStore
         foreach (var aggregateEvents in aggregatesEvents)
         {
             var streamId = aggregateEvents.Key.ToString();
-            var streamEvents = aggregateEvents.Select(x =>
-                    new EventData(
-                        Uuid.NewUuid(),
-                        $"{x.GetType().FullName}",
-                        new ReadOnlyMemory<byte>(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(x,
-                            new JsonSerializerSettings
-                            {
-                                TypeNameHandling = TypeNameHandling.All
-                            })))))
+            var streamEvents = aggregateEvents
+                .Select(x => new EventData(NewUuid(), $"{x.GetType().FullName}", SerializeEvent(x)))
                 .ToList();
 
             await _client.AppendToStreamAsync(streamId, StreamState.Any, streamEvents);
+
+            ReadOnlyMemory<byte> SerializeEvent(IEvent evt) =>
+                new(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(evt, new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.All
+                })));
         }
     }
 
@@ -48,12 +48,14 @@ public class EventStoreDb : IEventStore
 
         return stream
             .ToEnumerable()
-            .Select(x => JsonConvert.DeserializeObject(Encoding.UTF8.GetString(x.Event.Data.Span), new JsonSerializerSettings
+            .Select(x => DeserializeEvent(x.Event.Data.Span))
+            .ToArray();
+
+        IEvent DeserializeEvent(ReadOnlySpan<byte> data) =>
+            JsonConvert.DeserializeObject(Encoding.UTF8.GetString(data), new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.All
-            }))
-            .Cast<IEvent>()
-            .ToArray();
+            }) as IEvent;
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿using System;
-using TrainingCQRSES.Core;
+using TrainingCQRSES;
 
 namespace TrainingCQRSES.Tests;
 
