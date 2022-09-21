@@ -1,4 +1,4 @@
-﻿namespace TrainingCQRSES;
+﻿namespace TrainingCQRSES.Domain.Core;
 
 public class PanierInvalideException : Exception { }
 
@@ -60,11 +60,6 @@ public record ArticleAjouteEvt(Guid IdentifiantPanier, Article Article) : IEvent
 public record ArticleEnleveEvt(Guid IdentifiantPanier, Article Article) : IEvent;
 
 public record PanierValideEvt(Guid IdentifiantPanier) : IEvent;
-
-public interface IEvent
-{
-    Guid IdentifiantPanier { get; }
-};
 
 public record AjouterArticleCmd(Guid IdentifiantPanier, Article Article) : ICommand;
 

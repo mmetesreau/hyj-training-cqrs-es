@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Npgsql;
+using TrainingCQRSES.Domain.Core;
 
 namespace TrainingCQRSES.Web.Infra;
 

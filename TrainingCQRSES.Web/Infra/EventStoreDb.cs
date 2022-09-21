@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using EventStore.Client;
 using Newtonsoft.Json;
+using TrainingCQRSES.Domain;
 using static EventStore.Client.Uuid;
 
 namespace TrainingCQRSES.Web.Infra;
@@ -11,7 +12,10 @@ public class EventStoreDb : IEventStore
 
     public EventStoreDb(string cnx)
     {
-        _client = new EventStoreClient(EventStoreClientSettings.Create(cnx));
+        var settings = EventStoreClientSettings.Create(cnx);
+        settings.ConnectivitySettings.Insecure = true;
+        
+        _client = new EventStoreClient(settings);
     }
 
     public async Task Save(IEvent[] events)

@@ -1,4 +1,4 @@
-﻿namespace TrainingCQRSES;
+﻿namespace TrainingCQRSES.Domain.Core;
 
 public class PanierCommandHandler
 {
@@ -28,16 +28,4 @@ public class PanierCommandHandler
         
         await _eventPublisher.Publish(decisions);
     }
-}
-
-public interface IEventStore
-{
-    Task Save(IEvent[] events);
-    Task<IEvent[]> Get(Guid aggregateId);
-}
-
-public interface IEventPublisher
-{
-    Task Publish(IEvent[] events);
-    void Subscribe<T>(Action<T> handler) where T : IEvent;
 }

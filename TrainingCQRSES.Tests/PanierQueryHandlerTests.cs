@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TrainingCQRSES.Domain.Core;
 using Xunit;
 using static TrainingCQRSES.Tests.Data;
 

@@ -1,4 +1,7 @@
 ﻿using TrainingCQRSES;
+using TrainingCQRSES.Domain;
+using TrainingCQRSES.Domain.Core;
+using TrainingCQRSES.Infra;
 using Xunit;
 using static TrainingCQRSES.Tests.Data;
 

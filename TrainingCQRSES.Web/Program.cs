@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using TrainingCQRSES;
+using TrainingCQRSES.Domain;
+using TrainingCQRSES.Domain.Core;
+using TrainingCQRSES.Infra;
 using TrainingCQRSES.Web;
 using TrainingCQRSES.Web.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var postgresCnx = "User ID=postgres;Password=hackyourjob;Host=postgres;Port=5432;Database=postgres;";
-var eventStoreCnx = "esdb://eventstore:2113?tls=true&keepAliveTimeout=10000&keepAliveInterval=10000";
+var postgresCnx = "User ID=postgres;Password=hackyourjob;Host=localhost;Port=5432;Database=postgres;";
+var eventStoreCnx = "esdb://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000";
 
 var eventStore = new EventStoreDb(eventStoreCnx);
 var panierRepository = new PaniersPostgresRepository(postgresCnx);
@@ -28,6 +30,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI();
 

@@ -1,4 +1,4 @@
-﻿namespace TrainingCQRSES;
+﻿namespace TrainingCQRSES.Domain.Core;
 
 public record PanierQuantite()
 {

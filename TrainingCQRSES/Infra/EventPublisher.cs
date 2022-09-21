@@ -1,4 +1,6 @@
-﻿namespace TrainingCQRSES;
+﻿using TrainingCQRSES.Domain;
+
+namespace TrainingCQRSES.Infra;
 
 public class SimpleEventPublisher : IEventPublisher
 {
